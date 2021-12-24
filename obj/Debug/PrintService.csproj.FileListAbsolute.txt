@@ -1,0 +1,8 @@
+C:\Users\artem\Documents\ConsoleApp3\bin\Debug\PrintService.exe.config
+C:\Users\artem\Documents\ConsoleApp3\bin\Debug\PrintService.exe
+C:\Users\artem\Documents\ConsoleApp3\bin\Debug\PrintService.pdb
+C:\Users\artem\Documents\ConsoleApp3\obj\Debug\PrintService.csproj.SuggestedBindingRedirects.cache
+C:\Users\artem\Documents\ConsoleApp3\obj\Debug\PrintService.csproj.CoreCompileInputs.cache
+C:\Users\artem\Documents\ConsoleApp3\obj\Debug\PrintService.exe
+C:\Users\artem\Documents\ConsoleApp3\obj\Debug\PrintService.pdb
+C:\Users\artem\Documents\ConsoleApp3\obj\Debug\PrintService.csproj.AssemblyReference.cache
