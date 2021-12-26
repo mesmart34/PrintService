@@ -43,6 +43,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PaperClothPrinter.cs" />
+    <Compile Include="PaperPrinter.cs" />
+    <Compile Include="IPrinter.cs" />
     <Compile Include="PrintServiceSimulation.cs" />
     <Compile Include="Printer.cs" />
     <Compile Include="Program.cs" />

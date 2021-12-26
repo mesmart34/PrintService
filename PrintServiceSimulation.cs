@@ -10,22 +10,32 @@ namespace PrintService
 
     public enum JobType
     {
-        Paper, Cloth
+        None, Paper, Cloth
     };
+
+    public struct Result
+    {
+        List<Tuple<float, IPrinter>> printers;
+        
+    }
+
+
 
     public class PrintServiceSimulation
     {
+        public readonly static int DayLength = 600;
+        public readonly static int Days = 7;
         private int _minutes;
         private int _nextOrder;
         private int _rejectedOrders;
         private Random _random;
-        private List<Printer> _printers;
+        private List<IPrinter> _printers;
         private List<JobType> _tasks;
         private int _day;
 
         public PrintServiceSimulation()
         {
-            _printers = new List<Printer>();
+            _printers = new List<IPrinter>();
             _tasks = new List<JobType>();
             _random = new Random();
             _day = 0;
@@ -34,32 +44,36 @@ namespace PrintService
             _rejectedOrders = 0;
         }
 
-        public void AddPrinter(Printer.PrinterType printerType)
+        public void AddPrinter(IPrinter printer)
         {
-            _printers.Add(new Printer(printerType, _printers.Count + 1));
+            _printers.Add(printer);
         }
 
         public void Start()
         {
-            Console.WriteLine("Симуляция начата");
-            while (_day < 7)
+
+            //Console.WriteLine("Симуляция начата");
+            while (_day < Days)
             {
                 DoOrder();
                 UpdatePrinters();
                 NextStep();
             }
-            Console.WriteLine("Симуляция закончена");
+            //Console.WriteLine("Симуляция закончена");
             ShowResults();
         }
 
         private void NextStep()
         {
-            _minutes++;
-            if (_minutes >= 600)
+            if (_minutes >= DayLength)
             {
                 _day++;
                 _minutes = 0;
-                Console.WriteLine("День {0} прошел", _day);
+                //Console.WriteLine("День {0} прошел", _day);
+            }
+            else
+            {
+                _minutes++;
             }
         }
 
@@ -68,12 +82,16 @@ namespace PrintService
             Console.WriteLine("Показатель эффективности работы");
             foreach (var printer in _printers)
             {
-                var effectivity = printer._timeWorked / (_day * 600.0);
-                Console.WriteLine("\tЭффективность принтера {0}: {1}%", printer.Id, (int)(effectivity * 100));
+                var timers = printer.GetTimesWorked();
+                var min = (int)((timers.Min() / (double)DayLength) * 100);
+                var max = (int)((timers.Max() / (double)DayLength) * 100);
+                var effectivity = (int)((float)printer.GetTimeWorked() / (_day * DayLength) * 100);
+                //if(printer.Type == Printer.PrinterType.Paper)
+                Console.WriteLine("Принтер({4}) {0}: Мин.Загрузка: {1}%, Сред.Загрузка: {2}%, Выс.Загрузка: {3}% ", printer.Id, min, effectivity, max, printer.GetName());
             }
 
-            var totalClientPaper = _printers.Select(p => p.TotalPaper).Sum();
-            var totalClientCloth = _printers.Select(p => p.TotalCloth).Sum();
+            var totalClientPaper = _printers.Sum(p => p.GetTotalPaperOrders());
+            var totalClientCloth = _printers.Sum(p => p.GetTotalClothOrders());
             var totalClient = totalClientPaper + totalClientCloth;
             Console.WriteLine("\tКол-во выполненых заказов: {0}", totalClient);
             Console.WriteLine("\tКол-во заказов на печать бумаги: {0}", totalClientPaper);
@@ -84,9 +102,9 @@ namespace PrintService
 
         public void UpdatePrinters()
         {
-            foreach (var printer in _printers)
-                printer.Print();
-            foreach (var printer in _printers.Where(p => !p.Busy).OrderBy(p => p.TotalOrders))
+            foreach (var printer in _printers.Where(p => p.IsBusy()))
+                printer.Print(_day);
+            foreach (var printer in _printers.Where(p => !p.IsBusy()).OrderBy(p => p.GetTimeWorked()))
             {
                 if (printer.TakeOrder(_tasks, _minutes))
                     break;
@@ -97,7 +115,7 @@ namespace PrintService
         {
             foreach (var printer in _printers)
             {
-                if (!printer.Busy)
+                if (!printer.IsBusy())
                     return true;
             }
             return false;
@@ -114,19 +132,19 @@ namespace PrintService
             {
                 var task = GenerateJob();
                 _tasks.Add(task);
-                Console.WriteLine("Заказ добавлен в очередь {0}", task == JobType.Paper ? "Бумага" : "Ткань");
+               // Console.WriteLine("Заказ добавлен в очередь {0}", task == JobType.Paper ? "Бумага" : "Ткань");
             }
             else
             {
                 _rejectedOrders++;
-                Console.WriteLine("Заказ не принят. Всё занято");
+               // Console.WriteLine("Заказ не принят. Всё занято");
             }
         }
 
         private int GetNextOrderTime()
         {
             var time = _minutes + 15 + _random.Next(-5, 5);
-            if (time >= 600)
+            if (time >= DayLength)
                 return 15 + _random.Next(-5, 5);
             return time;
         }
